@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Product Catalog</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+header{
+background:#1e293b;
+color:white;
+padding:15px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+}
+
+header h1{
+font-size:24px;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+margin:0 10px;
+font-weight:bold;
+}
+
+nav a:hover{
+color:#38bdf8;
+}
+
+.container{
+padding:20px;
+max-width:1200px;
+margin:auto;
+}
+
+.controls{
+display:flex;
+gap:15px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+
+input,select{
+padding:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+input{
+flex:1;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,.1);
+text-align:center;
+}
+
+.card img{
+width:100%;
+height:200px;
+object-fit:cover;
+border-radius:10px;
+}
+
+.card h3{
+margin:10px 0;
+}
+
+.card p{
+margin:5px 0;
+}
+
+button{
+padding:10px 15px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+.cart-item{
+background:white;
+padding:15px;
+margin-bottom:10px;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.total{
+font-size:22px;
+font-weight:bold;
+margin-top:20px;
+}
+
+footer{
+text-align:center;
+padding:20px;
+background:#1e293b;
+color:white;
+margin-top:40px;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🛒 E-Commerce Store</h1>
+
+<nav>
+<a href="#home">Home</a>
+<a href="#products">Products</a>
+<a href="#cart">Cart (<span id="cartCount">0</span>)</a>
+</nav>
+</header>
+
+<div id="app" class="container"></div>
+
+<footer>
+<p>© 2026 E-Commerce Product Catalog</p>
+</footer>
+
+<script>
+
+const products = [
+{
+id:1,
+name:"Laptop",
+category:"Electronics",
+price:55000,
+image:"https://picsum.photos/300/200?1"
+},
+{
+id:2,
+name:"Smartphone",
+category:"Electronics",
+price:25000,
+image:"https://picsum.photos/300/200?2"
+},
+{
+id:3,
+name:"Headphones",
+category:"Electronics",
+price:3500,
+image:"https://picsum.photos/300/200?3"
+},
+{
+id:4,
+name:"Running Shoes",
+category:"Fashion",
+price:4500,
+image:"https://picsum.photos/300/200?4"
+},
+{
+id:5,
+name:"Backpack",
+category:"Fashion",
+price:1500,
+image:"https://picsum.photos/300/200?5"
+},
+{
+id:6,
+name:"Watch",
+category:"Accessories",
+price:3000,
+image:"https://picsum.photos/300/200?6"
+}
+];
+
+function getCart(){
+return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function saveCart(cart){
+localStorage.setItem("cart",JSON.stringify(cart));
+updateCartCount();
+}
+
+function addToCart(id){
+
+const cart=getCart();
+
+cart.push(id);
+
+saveCart(cart);
+
+alert("Product Added To Cart");
+}
+
+function removeFromCart(index){
+
+const cart=getCart();
+
+cart.splice(index,1);
+
+saveCart(cart);
+
+renderCart();
+}
+
+function updateCartCount(){
+
+document.getElementById("cartCount").textContent =
+getCart().length;
+}
+
+function renderHome(){
+
+document.getElementById("app").innerHTML=`
+<h2>Welcome To Our Store</h2>
+<br>
+<p>
+Explore products, search items,
+filter categories, and manage your cart.
+</p>
+
+<br>
+
+<img src="https://picsum.photos/1000/400"
+style="width:100%;border-radius:15px;">
+`;
+}
+
+function renderProducts(){
+
+document.getElementById("app").innerHTML=`
+
+<div class="controls">
+
+<input
+type="text"
+id="search"
+placeholder="Search products">
+
+<select id="category">
+<option value="All">All Categories</option>
+<option value="Electronics">Electronics</option>
+<option value="Fashion">Fashion</option>
+<option value="Accessories">Accessories</option>
+</select>
+
+</div>
+
+<div id="productGrid" class="grid"></div>
+`;
+
+displayProducts(products);
+
+document.getElementById("search")
+.addEventListener("input",filterProducts);
+
+document.getElementById("category")
+.addEventListener("change",filterProducts);
+}
+
+function displayProducts(items){
+
+document.getElementById("productGrid").innerHTML=
+items.map(product=>`
+
+<div class="card">
+
+<img src="${product.image}">
+
+<h3>${product.name}</h3>
+
+<p>${product.category}</p>
+
+<p>₹${product.price}</p>
+
+<button onclick="addToCart(${product.id})">
+Add To Cart
+</button>
+
+</div>
+
+`).join("");
+}
+
+function filterProducts(){
+
+const search=
+document.getElementById("search")
+.value.toLowerCase();
+
+const category=
+document.getElementById("category")
+.value;
+
+const filtered=
+products.filter(product=>{
+
+const matchSearch=
+product.name.toLowerCase()
+.includes(search);
+
+const matchCategory=
+category==="All" ||
+product.category===category;
+
+return matchSearch && matchCategory;
+});
+
+displayProducts(filtered);
+}
+
+function renderCart(){
+
+const cart=getCart();
+
+const items=cart.map(id=>
+products.find(p=>p.id===id)
+);
+
+let total=0;
+
+items.forEach(item=>{
+if(item) total+=item.price;
+});
+
+document.getElementById("app").innerHTML=`
+
+<h2>Your Cart</h2>
+
+<br>
+
+${items.map((item,index)=>`
+
+<div class="cart-item">
+
+<div>
+<h3>${item.name}</h3>
+<p>₹${item.price}</p>
+</div>
+
+<button onclick="removeFromCart(${index})">
+Remove
+</button>
+
+</div>
+
+`).join("")}
+
+<div class="total">
+Total: ₹${total}
+</div>
+`;
+}
+
+function router(){
+
+const hash=
+location.hash || "#home";
+
+switch(hash){
+
+case "#home":
+renderHome();
+break;
+
+case "#products":
+renderProducts();
+break;
+
+case "#cart":
+renderCart();
+break;
+
+default:
+renderHome();
+}
+}
+
+window.addEventListener(
+"hashchange",
+router
+);
+
+window.addEventListener(
+"load",
+()=>{
+router();
+updateCartCount();
+}
+);
+
+</script>
+
+</body>
+</html>
